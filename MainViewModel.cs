@@ -41,6 +41,9 @@ namespace ImageSteganography
             IsBusy = false;
         }
 
+        /// <summary>
+        /// Image property, binded to the UI main image.
+        /// </summary>
         public ImageSource Image
         {
             get { return _image; }
@@ -51,6 +54,9 @@ namespace ImageSteganography
             }
         }
 
+        /// <summary>
+        /// ImagePath property, binded the current loaded image path.
+        /// </summary>
         public string ImagePath
         {
             get { return _imagePath; }
@@ -61,6 +67,9 @@ namespace ImageSteganography
             }
         }
 
+        /// <summary>
+        /// ConcealedText property, binded to the current concealed text box from the UI.
+        /// </summary>
         public string ConcealedText
         {
             get { return _concealedText; }
@@ -71,6 +80,9 @@ namespace ImageSteganography
             }
         }
 
+        /// <summary>
+        /// IsBusy property, binded to the busy indicator, for long computations.
+        /// </summary>
         public bool IsBusy
         {
             get { return _isBusy; }
@@ -81,6 +93,9 @@ namespace ImageSteganography
             }
         }
 
+        /// <summary>
+        /// opens a file dialog and for selected BMP image updates the UI with the new image and with the current least significant bits data
+        /// </summary>
         private async void OpenImageFile()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -116,6 +131,11 @@ namespace ImageSteganography
             }
         }
 
+        /// <summary>
+        /// for a given image path, iterate on the image data, construct bytes from the lsb's of the image bytes, and return the constructed bytes as a string.
+        /// </summary>
+        /// <param name="imagePath">path the image</param>
+        /// <returns></returns>
         private string GetConcealedText(string imagePath)
         {
             using (Image<Bgr, Byte> img = new Image<Bgr, Byte>(imagePath))
@@ -148,6 +168,9 @@ namespace ImageSteganography
             }
         }
 
+        /// <summary>
+        /// Save the current concealed text to the current loaded image
+        /// </summary>
         private async void SaveConcealedMsgWithImageToFile()
         {
             IsBusy = true;
@@ -165,6 +188,9 @@ namespace ImageSteganography
             IsBusy = false;
         }
 
+        /// <summary>
+        ///  Save the current concealed text to the image file, using a save as file dialog.
+        /// </summary>
         private async void SaveAsConcealedMsgWithImageToFile()
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
@@ -197,6 +223,10 @@ namespace ImageSteganography
             }
         }
 
+        /// <summary>
+        /// Saves the current image to the given file name
+        /// </summary>
+        /// <param name="fileName">the image file name that will contain the image</param>
         private void SaveCurrentImageToFile(string fileName)
         {
             const byte lsbMask = 1;
