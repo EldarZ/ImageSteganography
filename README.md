@@ -1,11 +1,11 @@
 # Image Steganography Tool 
 https://en.wikipedia.org/wiki/Steganography
 
-The Image Steganography Tool uses the least significant bit (LSB) of each byte from the given image, to conceal a text message in the image.
+The Image Steganography Tool conceals a text message in a given image using the least significant bit (LSB) of each byte of the image data.
 
 Supporting BMP images.
 
-instructions:
-1. open a new image from the menu bar.
-2. edit the concealed image data.
-3. save the image with the concealed data.
+Instructions:
+1. Open a new image using the menu bar.
+2. Edit the concealed text constructed from the image least significant bits.
+3. Save the image with the concealed text.

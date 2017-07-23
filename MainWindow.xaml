@@ -22,6 +22,7 @@
                 <Menu DockPanel.Dock="Top">
                     <MenuItem Header="Menu">
                         <MenuItem Header="Open a New Image" Command="{Binding OpenImageFileCommand}"/>
+                        <MenuItem Header="Save Image" Command="{Binding SaveConcealedMsgWithImageToFileCommand}"/>
                         <MenuItem Header="Save Image As..." Command="{Binding SaveAsConcealedMsgWithImageToFileCommand}"/>
                     </MenuItem>
                 </Menu>
@@ -30,7 +31,7 @@
                 <TextBox Text="{Binding ImagePath, Converter={StaticResource PathToImageConverter}}" IsReadOnly="True" />
             </GroupBox>
             <GroupBox Grid.Row="2"  Header="Image" MaxHeight="480" >
-                <Image Stretch="Uniform" Source="{Binding ImagePath}" />
+                <Image Stretch="Uniform" Source="{Binding Image}" />
             </GroupBox>
             <GroupBox Grid.Row="3"  Header="Concealed Text" >
                 <TextBox Text="{Binding Path=ConcealedText, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" TextAlignment="Left"

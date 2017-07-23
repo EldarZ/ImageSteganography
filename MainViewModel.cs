@@ -2,6 +2,7 @@
 using Emgu.CV.Structure;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Threading;
 using Microsoft.Win32;
 using System;
 using System.Collections;
@@ -19,9 +20,11 @@ namespace ImageSteganography
 {
     public class MainViewModel : ViewModelBase
     {
+        private const int CONCEALED_TEXT_SIZE = 1000; //reduce the text size to improve performence
         private string _imagePath;
         private string _concealedText;
         private bool _isBusy;
+        private ImageSource _image;
 
         public RelayCommand OpenImageFileCommand { get; set; }
         public RelayCommand SaveConcealedMsgWithImageToFileCommand { get; set; }
@@ -29,11 +32,23 @@ namespace ImageSteganography
 
         public MainViewModel()
         {
+            DispatcherHelper.Initialize();
+
             OpenImageFileCommand = new RelayCommand(OpenImageFile);
             SaveConcealedMsgWithImageToFileCommand = new RelayCommand(SaveConcealedMsgWithImageToFile);
             SaveAsConcealedMsgWithImageToFileCommand = new RelayCommand(SaveAsConcealedMsgWithImageToFile);
 
             IsBusy = false;
+        }
+
+        public ImageSource Image
+        {
+            get { return _image; }
+            set
+            {
+                _image = value;
+                RaisePropertyChanged(() => Image);
+            }
         }
 
         public string ImagePath
@@ -73,24 +88,35 @@ namespace ImageSteganography
             var result = openFileDialog.ShowDialog();
             if (result == true)
             {
-                ImagePath = openFileDialog.FileName;
                 IsBusy = true;
                 await Task.Run(() =>
                 {
                     try
                     {
-                        UpdateConcealedText(openFileDialog.FileName);
+
+                        DispatcherHelper.UIDispatcher.Invoke(() => {
+                            BitmapImage image = new BitmapImage();
+                            image.BeginInit();
+                            image.CacheOption = BitmapCacheOption.OnLoad;
+                            image.UriSource = new Uri(openFileDialog.FileName);
+                            image.EndInit();
+                            Image = image;
+                        });
+
+                        ImagePath = openFileDialog.FileName;
+                        string concealedText = GetConcealedText(openFileDialog.FileName);
+                        ConcealedText = concealedText;
                     }
                     catch (Exception ex)
                     {
                         MessageBox.Show("Error : " + ex.Message);
                     }
-                });
-                IsBusy = false;
+                    
+                }).ContinueWith((task) => { IsBusy = false; }) ;
             }
         }
 
-        private void UpdateConcealedText(string imagePath)
+        private string GetConcealedText(string imagePath)
         {
             using (Image<Bgr, Byte> img = new Image<Bgr, Byte>(imagePath))
             {
@@ -118,8 +144,7 @@ namespace ImageSteganography
                         }
                     }
                 }
-                img.Dispose();
-                ConcealedText = currentConcealedText.ToString();
+                return currentConcealedText.ToString().Substring(0, CONCEALED_TEXT_SIZE);
             }
         }
 
@@ -152,8 +177,16 @@ namespace ImageSteganography
                     try
                     {
                         SaveCurrentImageToFile(saveFileDialog.FileName);
+                        DispatcherHelper.UIDispatcher.Invoke(() => {
+                            BitmapImage image = new BitmapImage();
+                            image.BeginInit();
+                            image.CacheOption = BitmapCacheOption.OnLoad;
+                            image.UriSource = new Uri(saveFileDialog.FileName);
+                            image.EndInit();
+                            Image = image;
+                        });
                         ImagePath = saveFileDialog.FileName;
-                        UpdateConcealedText(ImagePath);
+                        ConcealedText = GetConcealedText(ImagePath);
                     }
                     catch (Exception ex)
                     {
@@ -189,14 +222,13 @@ namespace ImageSteganography
                     {
                         for (int k = 0; k < 3 && bytesIndex < lsbs.Count; k++)
                         {
-                            img.Data[i, j, k] &= (byte)(254); // 11111110
+                            img.Data[i, j, k] &= 254; // 11111110
                             img.Data[i, j, k] |= lsbs[bytesIndex];
                             bytesIndex++;
                         }
                     }
                 }
                 img.Save(fileName);
-                img.Dispose();
             }
         }
     }
